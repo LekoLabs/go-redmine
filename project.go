@@ -31,8 +31,8 @@ type Project struct {
 	CustomFields []*CustomField `json:"custom_fields,omitempty"`
 }
 
-func (c *Client) Project(id int) (*Project, error) {
-	res, err := c.Get(c.endpoint + "/projects/" + strconv.Itoa(id) + ".json?key=" + c.apikey)
+func (c *Client) Project(id string) (*Project, error) {
+	res, err := c.Get(c.endpoint + "/projects/" + id + ".json?key=" + c.apikey)
 	if err != nil {
 		return nil, err
 	}
@@ -149,8 +149,8 @@ func (c *Client) UpdateProject(project Project) error {
 	return err
 }
 
-func (c *Client) DeleteProject(id int) error {
-	req, err := http.NewRequest("DELETE", c.endpoint+"/projects/"+strconv.Itoa(id)+".json?key="+c.apikey, strings.NewReader(""))
+func (c *Client) DeleteProject(id string) error {
+	req, err := http.NewRequest("DELETE", c.endpoint+"/projects/"+id+".json?key="+c.apikey, strings.NewReader(""))
 	if err != nil {
 		return err
 	}

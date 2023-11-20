@@ -1,2 +1,4 @@
+github.com/mattn/go-redmine v0.0.3 h1:AUnENzHbNvpVY9trOkPNF8rwuFjAJ+eM1wecw6f4P8U=
+github.com/mattn/go-redmine v0.0.3/go.mod h1:fivxYNv/2LQ6tHOo12tSNeQoY1t9nsvP1HZ3ChXMh2M=
 github.com/mattn/go-shellwords v1.0.12 h1:M2zGm7EW6UQJvDeQxo4T51eKPurbeFbe8WtebGE2xrk=
 github.com/mattn/go-shellwords v1.0.12/go.mod h1:EZzvwXDESEeg03EKmM+RmDnNOPKG4lLtQsUlTZDWQ8Y=
