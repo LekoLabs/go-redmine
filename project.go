@@ -21,14 +21,15 @@ type projectsResult struct {
 }
 
 type Project struct {
-	Id           int            `json:"id"`
-	Parent       IdName         `json:"parent"`
-	Name         string         `json:"name"`
-	Identifier   string         `json:"identifier"`
-	Description  string         `json:"description"`
-	CreatedOn    string         `json:"created_on"`
-	UpdatedOn    string         `json:"updated_on"`
-	CustomFields []*CustomField `json:"custom_fields,omitempty"`
+	Id                 int            `json:"id"`
+	Parent             IdName         `json:"parent"`
+	Name               string         `json:"name"`
+	Identifier         string         `json:"identifier"`
+	Description        string         `json:"description"`
+	CreatedOn          string         `json:"created_on"`
+	UpdatedOn          string         `json:"updated_on"`
+	CustomFields       []*CustomField `json:"custom_fields,omitempty"`
+	EnabledModuleNames []string       `json:"enabled_module_names,omitempty"`
 }
 
 func (c *Client) Project(id string) (*Project, error) {
