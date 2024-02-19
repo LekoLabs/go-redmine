@@ -39,37 +39,37 @@ type Journal struct {
 }
 
 type Issue struct {
-	Id           int            `json:"id"`
-	Subject      string         `json:"subject"`
-	Description  string         `json:"description"`
-	ProjectId    int            `json:"project_id"`
-	Project      *IdName        `json:"project"`
-	TrackerId    int            `json:"tracker_id"`
-	Tracker      *IdName        `json:"tracker"`
-	ParentId     int            `json:"parent_issue_id,omitempty"`
-	Parent       *Id            `json:"parent"`
-	StatusId     int            `json:"status_id"`
-	Status       *IdName        `json:"status"`
-	PriorityId   int            `json:"priority_id,omitempty"`
-	Priority     *IdName        `json:"priority"`
-	Author       *IdName        `json:"author"`
-	FixedVersion *IdName        `json:"fixed_version"`
-	AssignedTo   *IdName        `json:"assigned_to"`
-	AssignedToId int            `json:"assigned_to_id"`
-	Category     *IdName        `json:"category"`
-	CategoryId   int            `json:"category_id"`
-	Notes        string         `json:"notes"`
-	StatusDate   string         `json:"status_date"`
-	CreatedOn    string         `json:"created_on"`
-	UpdatedOn    string         `json:"updated_on"`
-	StartDate    string         `json:"start_date"`
-	DueDate      string         `json:"due_date"`
-	ClosedOn     string         `json:"closed_on"`
-	CustomFields []*CustomField `json:"custom_fields,omitempty"`
-	Uploads      []*Upload      `json:"uploads"`
-	DoneRatio    float32        `json:"done_ratio"`
-	EstimatedHours float32      `json:"estimated_hours"`
-	Journals     []*Journal     `json:"journals"`
+	Id             string         `json:"id"`
+	Subject        string         `json:"subject"`
+	Description    string         `json:"description"`
+	ProjectId      int            `json:"project_id"`
+	Project        *IdName        `json:"project"`
+	TrackerId      int            `json:"tracker_id"`
+	Tracker        *IdName        `json:"tracker"`
+	ParentId       int            `json:"parent_issue_id,omitempty"`
+	Parent         *Id            `json:"parent"`
+	StatusId       int            `json:"status_id"`
+	Status         *IdName        `json:"status"`
+	PriorityId     int            `json:"priority_id,omitempty"`
+	Priority       *IdName        `json:"priority"`
+	Author         *IdName        `json:"author"`
+	FixedVersion   *IdName        `json:"fixed_version"`
+	AssignedTo     *IdName        `json:"assigned_to"`
+	AssignedToId   int            `json:"assigned_to_id"`
+	Category       *IdName        `json:"category"`
+	CategoryId     int            `json:"category_id"`
+	Notes          string         `json:"notes"`
+	StatusDate     string         `json:"status_date"`
+	CreatedOn      string         `json:"created_on"`
+	UpdatedOn      string         `json:"updated_on"`
+	StartDate      string         `json:"start_date"`
+	DueDate        string         `json:"due_date"`
+	ClosedOn       string         `json:"closed_on"`
+	CustomFields   []*CustomField `json:"custom_fields,omitempty"`
+	Uploads        []*Upload      `json:"uploads"`
+	DoneRatio      float32        `json:"done_ratio"`
+	EstimatedHours float32        `json:"estimated_hours"`
+	Journals       []*Journal     `json:"journals"`
 }
 
 type IssueFilter struct {
@@ -90,8 +90,8 @@ type CustomField struct {
 	Value       interface{} `json:"value"`
 }
 
-func (c *Client) IssuesOf(projectId int) ([]Issue, error) {
-	issues, err := getIssues(c, "/issues.json?project_id="+strconv.Itoa(projectId)+"&key="+c.apikey+c.getPaginationClause())
+func (c *Client) IssuesOf(projectId string) ([]Issue, error) {
+	issues, err := getIssues(c, "/issues.json?project_id="+projectId+"&key="+c.apikey+c.getPaginationClause())
 
 	if err != nil {
 		return nil, err
@@ -100,11 +100,11 @@ func (c *Client) IssuesOf(projectId int) ([]Issue, error) {
 	return issues, nil
 }
 
-func (c *Client) Issue(id int) (*Issue, error) {
+func (c *Client) Issue(id string) (*Issue, error) {
 	return getOneIssue(c, id, nil)
 }
 
-func (c *Client) IssueWithArgs(id int, args map[string]string) (*Issue, error) {
+func (c *Client) IssueWithArgs(id string, args map[string]string) (*Issue, error) {
 	return getOneIssue(c, id, args)
 }
 
@@ -178,7 +178,7 @@ func (c *Client) UpdateIssue(issue Issue) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("PUT", c.endpoint+"/issues/"+strconv.Itoa(issue.Id)+".json?key="+c.apikey, strings.NewReader(string(s)))
+	req, err := http.NewRequest("PUT", c.endpoint+"/issues/"+issue.Id+".json?key="+c.apikey, strings.NewReader(string(s)))
 	if err != nil {
 		return err
 	}
@@ -234,7 +234,7 @@ func (c *Client) DeleteIssue(id int) error {
 }
 
 func (issue *Issue) GetTitle() string {
-	return issue.Tracker.Name + " #" + strconv.Itoa(issue.Id) + ": " + issue.Subject
+	return issue.Tracker.Name + " #" + issue.Id + ": " + issue.Subject
 }
 
 // MarshalJSON marshals issue to JSON.
@@ -308,8 +308,8 @@ func mapConcat(m map[string]string, delimiter string) string {
 	return strings.Join(args, delimiter)
 }
 
-func getOneIssue(c *Client, id int, args map[string]string) (*Issue, error) {
-	url := c.endpoint + "/issues/" + strconv.Itoa(id) + ".json?key=" + c.apikey
+func getOneIssue(c *Client, id string, args map[string]string) (*Issue, error) {
+	url := c.endpoint + "/issues/" + id + ".json?key=" + c.apikey
 
 	if args != nil {
 		url += "&" + mapConcat(args, "&")
