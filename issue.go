@@ -39,7 +39,7 @@ type Journal struct {
 }
 
 type Issue struct {
-	Id             string         `json:"id"`
+	Id             int            `json:"id"`
 	Subject        string         `json:"subject"`
 	Description    string         `json:"description"`
 	ProjectId      string         `json:"project_id"`
