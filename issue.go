@@ -100,11 +100,11 @@ func (c *Client) IssuesOf(projectId string) ([]Issue, error) {
 	return issues, nil
 }
 
-func (c *Client) Issue(id string) (*Issue, error) {
+func (c *Client) Issue(id int) (*Issue, error) {
 	return getOneIssue(c, id, nil)
 }
 
-func (c *Client) IssueWithArgs(id string, args map[string]string) (*Issue, error) {
+func (c *Client) IssueWithArgs(id int, args map[string]string) (*Issue, error) {
 	return getOneIssue(c, id, args)
 }
 
@@ -178,7 +178,7 @@ func (c *Client) UpdateIssue(issue Issue) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("PUT", c.endpoint+"/issues/"+issue.Id+".json?key="+c.apikey, strings.NewReader(string(s)))
+	req, err := http.NewRequest("PUT", c.endpoint+"/issues/"+strconv.Itoa(issue.Id)+".json?key="+c.apikey, strings.NewReader(string(s)))
 	if err != nil {
 		return err
 	}
@@ -234,7 +234,7 @@ func (c *Client) DeleteIssue(id int) error {
 }
 
 func (issue *Issue) GetTitle() string {
-	return issue.Tracker.Name + " #" + issue.Id + ": " + issue.Subject
+	return issue.Tracker.Name + " #" + strconv.Itoa(issue.Id) + ": " + issue.Subject
 }
 
 // MarshalJSON marshals issue to JSON.
@@ -308,8 +308,8 @@ func mapConcat(m map[string]string, delimiter string) string {
 	return strings.Join(args, delimiter)
 }
 
-func getOneIssue(c *Client, id string, args map[string]string) (*Issue, error) {
-	url := c.endpoint + "/issues/" + id + ".json?key=" + c.apikey
+func getOneIssue(c *Client, id int, args map[string]string) (*Issue, error) {
+	url := c.endpoint + "/issues/" + strconv.Itoa(id) + ".json?key=" + c.apikey
 
 	if args != nil {
 		url += "&" + mapConcat(args, "&")
