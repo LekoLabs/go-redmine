@@ -42,7 +42,7 @@ type Issue struct {
 	Id             string         `json:"id"`
 	Subject        string         `json:"subject"`
 	Description    string         `json:"description"`
-	ProjectId      int            `json:"project_id"`
+	ProjectId      string         `json:"project_id"`
 	Project        *IdName        `json:"project"`
 	TrackerId      int            `json:"tracker_id"`
 	Tracker        *IdName        `json:"tracker"`
