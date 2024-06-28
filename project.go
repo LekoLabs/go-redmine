@@ -32,6 +32,22 @@ type Project struct {
 	EnabledModuleNames []string       `json:"enabled_module_names,omitempty"`
 }
 
+type ProjectToCreate struct {
+	Name               string            `json:"name"`
+	Identifier         string            `json:"identifier"`
+	Description        string            `json:"description"`
+	IsPublic           bool              `json:"is_public"`
+	ParentID           int               `json:"parent_id,omitempty"`
+	InheritMembers     bool              `json:"inherit_members,omitempty"`
+	TrackerIDs         []int             `json:"tracker_ids,omitempty"`
+	EnabledModuleNames []string          `json:"enabled_module_names,omitempty"`
+	CustomFieldValues  map[string]string `json:"custom_field_values,omitempty"`
+}
+
+type ProjectCreationRequest struct {
+	Project ProjectToCreate `json:"project"`
+}
+
 func (c *Client) Project(id string) (*Project, error) {
 	res, err := c.Get(c.endpoint + "/projects/" + id + ".json?key=" + c.apikey)
 	if err != nil {
@@ -80,8 +96,8 @@ func (c *Client) Projects() ([]Project, error) {
 	return r.Projects, nil
 }
 
-func (c *Client) CreateProject(project Project) (*Project, error) {
-	var ir projectRequest
+func (c *Client) CreateProject(project ProjectToCreate) (*Project, error) {
+	var ir ProjectCreationRequest
 	ir.Project = project
 	s, err := json.Marshal(ir)
 	if err != nil {
@@ -163,11 +179,11 @@ func (c *Client) DeleteProject(id string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
-	if res.StatusCode != 200 {
+	if res.StatusCode != 204 {
 		var er errorsResult
 		err = decoder.Decode(&er)
 		if err == nil {
