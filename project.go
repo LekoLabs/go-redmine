@@ -21,15 +21,20 @@ type projectsResult struct {
 }
 
 type Project struct {
-	Id                 int            `json:"id"`
-	Parent             IdName         `json:"parent"`
-	Name               string         `json:"name"`
-	Identifier         string         `json:"identifier"`
-	Description        string         `json:"description"`
-	CreatedOn          string         `json:"created_on"`
-	UpdatedOn          string         `json:"updated_on"`
-	CustomFields       []*CustomField `json:"custom_fields,omitempty"`
-	EnabledModuleNames []string       `json:"enabled_module_names,omitempty"`
+	Id                 int               `json:"id"`
+	Parent             IdName            `json:"parent,omitempty"`
+	Name               string            `json:"name"`
+	Identifier         string            `json:"identifier"`
+	Description        string            `json:"description,omitempty"`
+	CreatedOn          string            `json:"created_on,omitempty"`
+	UpdatedOn          string            `json:"updated_on,omitempty"`
+	IsPublic           bool              `json:"is_public,omitempty"`
+	ParentID           int               `json:"parent_id,omitempty"`
+	InheritMembers     bool              `json:"inherit_members,omitempty"`
+	TrackerIDs         []int             `json:"tracker_ids,omitempty"`
+	EnabledModuleNames []string          `json:"enabled_module_names,omitempty"`
+	CustomFields       []*CustomField    `json:"custom_fields,omitempty"`
+	CustomFieldValues  map[string]string `json:"custom_field_values,omitempty"`
 }
 
 func (c *Client) Project(id string) (*Project, error) {
@@ -134,7 +139,7 @@ func (c *Client) UpdateProject(project Project) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)
@@ -163,11 +168,11 @@ func (c *Client) DeleteProject(id string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
-	if res.StatusCode != 200 {
+	if res.StatusCode != 204 {
 		var er errorsResult
 		err = decoder.Decode(&er)
 		if err == nil {
