@@ -21,31 +21,20 @@ type projectsResult struct {
 }
 
 type Project struct {
-	Id                 int            `json:"id"`
-	Parent             IdName         `json:"parent"`
-	Name               string         `json:"name"`
-	Identifier         string         `json:"identifier"`
-	Description        string         `json:"description"`
-	CreatedOn          string         `json:"created_on"`
-	UpdatedOn          string         `json:"updated_on"`
-	CustomFields       []*CustomField `json:"custom_fields,omitempty"`
-	EnabledModuleNames []string       `json:"enabled_module_names,omitempty"`
-}
-
-type ProjectToCreate struct {
+	Id                 int               `json:"id"`
+	Parent             IdName            `json:"parent,omitempty"`
 	Name               string            `json:"name"`
 	Identifier         string            `json:"identifier"`
-	Description        string            `json:"description"`
-	IsPublic           bool              `json:"is_public"`
+	Description        string            `json:"description,omitempty"`
+	CreatedOn          string            `json:"created_on,omitempty"`
+	UpdatedOn          string            `json:"updated_on,omitempty"`
+	IsPublic           bool              `json:"is_public,omitempty"`
 	ParentID           int               `json:"parent_id,omitempty"`
 	InheritMembers     bool              `json:"inherit_members,omitempty"`
 	TrackerIDs         []int             `json:"tracker_ids,omitempty"`
 	EnabledModuleNames []string          `json:"enabled_module_names,omitempty"`
+	CustomFields       []*CustomField    `json:"custom_fields,omitempty"`
 	CustomFieldValues  map[string]string `json:"custom_field_values,omitempty"`
-}
-
-type ProjectCreationRequest struct {
-	Project ProjectToCreate `json:"project"`
 }
 
 func (c *Client) Project(id string) (*Project, error) {
@@ -96,8 +85,8 @@ func (c *Client) Projects() ([]Project, error) {
 	return r.Projects, nil
 }
 
-func (c *Client) CreateProject(project ProjectToCreate) (*Project, error) {
-	var ir ProjectCreationRequest
+func (c *Client) CreateProject(project Project) (*Project, error) {
+	var ir projectRequest
 	ir.Project = project
 	s, err := json.Marshal(ir)
 	if err != nil {
@@ -150,7 +139,7 @@ func (c *Client) UpdateProject(project Project) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)

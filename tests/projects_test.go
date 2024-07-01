@@ -9,7 +9,7 @@ import (
 )
 
 func createSingleProject(t *testing.T, project_id string, client_redmine *lkredmine.Client) {
-	preparedProject := lkredmine.ProjectToCreate{
+	preparedProject := lkredmine.Project{
 		Name:        "Test Project X",
 		Identifier:  project_id,
 		Description: "This is the test project X.",
