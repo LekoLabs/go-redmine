@@ -1,2 +1,3 @@
 cmd/godmine/*.exe
 cmd/godmine/godmine
+tests/.env
