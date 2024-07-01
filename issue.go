@@ -42,7 +42,7 @@ type Issue struct {
 	Id             int            `json:"id"`
 	Subject        string         `json:"subject"`
 	Description    string         `json:"description"`
-	ProjectId      string         `json:"project_id"`
+	ProjectId      int            `json:"project_id"`
 	Project        *IdName        `json:"project"`
 	TrackerId      int            `json:"tracker_id"`
 	Tracker        *IdName        `json:"tracker"`
@@ -55,9 +55,9 @@ type Issue struct {
 	Author         *IdName        `json:"author"`
 	FixedVersion   *IdName        `json:"fixed_version"`
 	AssignedTo     *IdName        `json:"assigned_to"`
-	AssignedToId   int            `json:"assigned_to_id"`
+	AssignedToId   int            `json:"assigned_to_id,omitempty"`
 	Category       *IdName        `json:"category"`
-	CategoryId     string         `json:"category_id"`
+	CategoryId     int            `json:"category_id,omitempty"`
 	Notes          string         `json:"notes"`
 	StatusDate     string         `json:"status_date"`
 	CreatedOn      string         `json:"created_on"`
