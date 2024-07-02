@@ -143,7 +143,8 @@ func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", c.endpoint+"/issues.json?key="+c.apikey, strings.NewReader(string(s)))
+	ss := string(s)
+	req, err := http.NewRequest("POST", c.endpoint+"/issues.json?key="+c.apikey, strings.NewReader(ss))
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +156,7 @@ func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
 	defer res.Body.Close()
 
 	decoder := json.NewDecoder(res.Body)
-	var r issueRequest
+	var r issueResult
 	if res.StatusCode != 201 {
 		var er errorsResult
 		err = decoder.Decode(&er)
@@ -178,7 +179,8 @@ func (c *Client) UpdateIssue(issue Issue) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("PUT", c.endpoint+"/issues/"+strconv.Itoa(issue.Id)+".json?key="+c.apikey, strings.NewReader(string(s)))
+	ss := string(s)
+	req, err := http.NewRequest("PUT", c.endpoint+"/issues/"+strconv.Itoa(issue.Id)+".json?key="+c.apikey, strings.NewReader(ss))
 	if err != nil {
 		return err
 	}
@@ -190,7 +192,7 @@ func (c *Client) UpdateIssue(issue Issue) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not found")
 	}
 	if res.StatusCode/100 != 2 {
 		decoder := json.NewDecoder(res.Body)
@@ -219,11 +221,11 @@ func (c *Client) DeleteIssue(id int) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusNoContent {
 		var er errorsResult
 		err = decoder.Decode(&er)
 		if err == nil {
@@ -322,7 +324,7 @@ func getOneIssue(c *Client, id int, args map[string]string) (*Issue, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
@@ -372,7 +374,7 @@ func getIssues(c *Client, url string) ([]Issue, error) {
 	completed := false
 	var issues []Issue
 
-	for completed == false {
+	for !completed {
 		r, err := getIssue(c, url, len(issues))
 
 		if err != nil {
