@@ -143,7 +143,8 @@ func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", c.endpoint+"/issues.json?key="+c.apikey, strings.NewReader(string(s)))
+	ss := string(s)
+	req, err := http.NewRequest("POST", c.endpoint+"/issues.json?key="+c.apikey, strings.NewReader(ss))
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +156,7 @@ func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
 	defer res.Body.Close()
 
 	decoder := json.NewDecoder(res.Body)
-	var r issueRequest
+	var r issueResult
 	if res.StatusCode != 201 {
 		var er errorsResult
 		err = decoder.Decode(&er)
@@ -178,7 +179,8 @@ func (c *Client) UpdateIssue(issue Issue) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("PUT", c.endpoint+"/issues/"+strconv.Itoa(issue.Id)+".json?key="+c.apikey, strings.NewReader(string(s)))
+	ss := string(s)
+	req, err := http.NewRequest("PUT", c.endpoint+"/issues/"+strconv.Itoa(issue.Id)+".json?key="+c.apikey, strings.NewReader(ss))
 	if err != nil {
 		return err
 	}
