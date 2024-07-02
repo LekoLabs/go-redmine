@@ -38,6 +38,27 @@ type Journal struct {
 	Details   []JournalDetails `json:"details"`
 }
 
+type IssueCreationRequest struct {
+	Issue IssueToCreate `json:"issue"`
+}
+
+type IssueToCreate struct {
+	ProjectId      int            `json:"project_id"`
+	TrackerId      int            `json:"tracker_id"`
+	StatusId       int            `json:"status_id,omitempty"`
+	PriorityId     int            `json:"priority_id,omitempty"`
+	Subject        string         `json:"subject"`
+	Description    string         `json:"description"`
+	CategoryId     int            `json:"category_id,omitempty"`
+	FixedVersionId int            `json:"fixed_version_id,omitempty"`
+	AssignedToId   int            `json:"assigned_to_id,omitempty"`
+	ParentIssueId  int            `json:"parent_issue_id,omitempty"`
+	CustomFields   []*CustomField `json:"custom_fields,omitempty"`
+	WatcherUserIds []int          `json:"watcher_user_ids,omitempty"`
+	IsPrivate      bool           `json:"is_private"`
+	EstimatedHours float32        `json:"estimated_hours,omitempty"`
+}
+
 type Issue struct {
 	Id             int            `json:"id"`
 	Subject        string         `json:"subject"`
@@ -136,9 +157,9 @@ func (c *Client) Issues() ([]Issue, error) {
 	return issues, nil
 }
 
-func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
-	var ir issueRequest
-	ir.Issue = issue
+func (c *Client) CreateIssue(issueToCreate IssueToCreate) (*Issue, error) {
+	var ir IssueCreationRequest
+	ir.Issue = issueToCreate
 	s, err := json.Marshal(ir)
 	if err != nil {
 		return nil, err
