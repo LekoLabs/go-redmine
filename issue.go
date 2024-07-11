@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -60,30 +61,65 @@ type IssueToCreate struct {
 }
 
 type Issue struct {
-	Id             int            `json:"id"`
-	Subject        string         `json:"subject"`
-	Description    string         `json:"description"`
-	Project        *IdName        `json:"project"`
-	Tracker        *IdName        `json:"tracker"`
-	Parent         *Id            `json:"parent"`
-	Status         *IdName        `json:"status"`
-	Priority       *IdName        `json:"priority"`
-	Author         *IdName        `json:"author"`
-	FixedVersion   *IdName        `json:"fixed_version"`
-	AssignedTo     *IdName        `json:"assigned_to"`
-	Category       *IdName        `json:"category"`
-	Notes          string         `json:"notes"`
-	StatusDate     string         `json:"status_date"`
-	CreatedOn      string         `json:"created_on"`
-	UpdatedOn      string         `json:"updated_on"`
-	StartDate      string         `json:"start_date"`
-	DueDate        string         `json:"due_date"`
-	ClosedOn       string         `json:"closed_on"`
-	CustomFields   []*CustomField `json:"custom_fields,omitempty"`
-	Uploads        []*Upload      `json:"uploads"`
-	DoneRatio      float32        `json:"done_ratio"`
-	EstimatedHours float32        `json:"estimated_hours"`
-	Journals       []*Journal     `json:"journals"`
+	Id             int                    `json:"id"`
+	Subject        string                 `json:"subject"`
+	Description    string                 `json:"description"`
+	Project        *IdName                `json:"project"`
+	Tracker        *IdName                `json:"tracker"`
+	Parent         *Id                    `json:"parent"`
+	Status         *IdName                `json:"status"`
+	Priority       *IdName                `json:"priority"`
+	Author         *IdName                `json:"author"`
+	FixedVersion   *IdName                `json:"fixed_version"`
+	AssignedTo     *IdName                `json:"assigned_to"`
+	Category       *IdName                `json:"category"`
+	Notes          string                 `json:"notes"`
+	StatusDate     string                 `json:"status_date"`
+	CreatedOn      string                 `json:"created_on"`
+	UpdatedOn      string                 `json:"updated_on"`
+	StartDate      string                 `json:"start_date"`
+	DueDate        string                 `json:"due_date"`
+	ClosedOn       string                 `json:"closed_on"`
+	CustomFields   []*CustomField         `json:"custom_fields,omitempty"`
+	Uploads        []*Upload              `json:"uploads"`
+	DoneRatio      float32                `json:"done_ratio"`
+	EstimatedHours float32                `json:"estimated_hours"`
+	Journals       []*Journal             `json:"journals"`
+	Extra          map[string]interface{} `json:"-"`
+}
+
+func (o *Issue) UnmarshalJSON(data []byte) error {
+	// Create an alias type to avoid infinite recursion
+	type Alias Issue
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(o),
+	}
+
+	// Unmarshal known fields
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	// Unmarshal all fields into a map
+	extra := make(map[string]interface{})
+	if err := json.Unmarshal(data, &extra); err != nil {
+		return err
+	}
+
+	// Use reflection to iterate over the struct fields and remove known fields from the map
+	val := reflect.ValueOf(o).Elem()
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		jsonTag := field.Tag.Get("json")
+		if jsonTag != "" && jsonTag != "-" {
+			delete(extra, jsonTag)
+		}
+	}
+
+	o.Extra = extra
+	return nil
 }
 
 type IssueFilter struct {
