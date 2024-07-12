@@ -113,6 +113,8 @@ func (o *Issue) UnmarshalJSON(data []byte) error {
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
 		jsonTag := field.Tag.Get("json")
+		// Remove everything after a comma (if the comma exists)
+		jsonTag = removeAfterComma(jsonTag)
 		if jsonTag != "" && jsonTag != "-" {
 			delete(extra, jsonTag)
 		}
