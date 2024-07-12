@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -60,30 +61,116 @@ type IssueToCreate struct {
 }
 
 type Issue struct {
-	Id             int            `json:"id"`
-	Subject        string         `json:"subject"`
-	Description    string         `json:"description"`
-	Project        *IdName        `json:"project"`
-	Tracker        *IdName        `json:"tracker"`
-	Parent         *Id            `json:"parent"`
-	Status         *IdName        `json:"status"`
-	Priority       *IdName        `json:"priority"`
-	Author         *IdName        `json:"author"`
-	FixedVersion   *IdName        `json:"fixed_version"`
-	AssignedTo     *IdName        `json:"assigned_to"`
-	Category       *IdName        `json:"category"`
-	Notes          string         `json:"notes"`
-	StatusDate     string         `json:"status_date"`
-	CreatedOn      string         `json:"created_on"`
-	UpdatedOn      string         `json:"updated_on"`
-	StartDate      string         `json:"start_date"`
-	DueDate        string         `json:"due_date"`
-	ClosedOn       string         `json:"closed_on"`
-	CustomFields   []*CustomField `json:"custom_fields,omitempty"`
-	Uploads        []*Upload      `json:"uploads"`
-	DoneRatio      float32        `json:"done_ratio"`
-	EstimatedHours float32        `json:"estimated_hours"`
-	Journals       []*Journal     `json:"journals"`
+	Id             int                    `json:"id"`
+	Subject        string                 `json:"subject"`
+	Description    string                 `json:"description"`
+	Project        *IdName                `json:"project"`
+	Tracker        *IdName                `json:"tracker"`
+	Parent         *Id                    `json:"parent"`
+	Status         *IdName                `json:"status"`
+	Priority       *IdName                `json:"priority"`
+	Author         *IdName                `json:"author"`
+	FixedVersion   *IdName                `json:"fixed_version"`
+	AssignedTo     *IdName                `json:"assigned_to"`
+	Category       *IdName                `json:"category"`
+	Notes          string                 `json:"notes"`
+	StatusDate     string                 `json:"status_date"`
+	CreatedOn      string                 `json:"created_on"`
+	UpdatedOn      string                 `json:"updated_on"`
+	StartDate      string                 `json:"start_date"`
+	DueDate        string                 `json:"due_date"`
+	ClosedOn       string                 `json:"closed_on"`
+	CustomFields   []*CustomField         `json:"custom_fields,omitempty"`
+	Uploads        []*Upload              `json:"uploads"`
+	DoneRatio      float32                `json:"done_ratio"`
+	EstimatedHours float32                `json:"estimated_hours"`
+	Journals       []*Journal             `json:"journals"`
+	Extra          map[string]interface{} `json:"-"`
+}
+
+func (issue Issue) MarshalJSON() ([]byte, error) {
+	type Issue2 Issue
+
+	// To reset parent issue, set empty string to "parent_issue_id"
+	var parentIssueID *string
+	if issue.Parent == nil {
+		// reset parent issue
+		id := ""
+		parentIssueID = &id
+	}
+
+	// Marshal the main struct without the Extra fields
+	aux, err := json.Marshal(&struct {
+		Issue2
+		ParentId *string `json:"parent_issue_id,omitempty"`
+	}{
+		Issue2:   Issue2(issue),
+		ParentId: parentIssueID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Marshal the Extra fields
+	extraData, err := json.Marshal(issue.Extra)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal both into maps
+	var auxMap map[string]interface{}
+	var extraMap map[string]interface{}
+
+	if err := json.Unmarshal(aux, &auxMap); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(extraData, &extraMap); err != nil {
+		return nil, err
+	}
+
+	// Merge the Extra fields into the main struct map
+	for key, value := range extraMap {
+		auxMap[key] = value
+	}
+
+	// Marshal the final map back to JSON
+	return json.Marshal(auxMap)
+}
+
+func (issue *Issue) UnmarshalJSON(data []byte) error {
+	// Create an alias type to avoid infinite recursion
+	type Alias Issue
+	aux := &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(issue),
+	}
+
+	// Unmarshal known fields
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	// Unmarshal all fields into a map
+	extra := make(map[string]interface{})
+	if err := json.Unmarshal(data, &extra); err != nil {
+		return err
+	}
+
+	// Use reflection to iterate over the struct fields and remove known fields from the map
+	val := reflect.ValueOf(issue).Elem()
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		jsonTag := field.Tag.Get("json")
+		// Remove everything after a comma (if the comma exists)
+		jsonTag = removeAfterComma(jsonTag)
+		if jsonTag != "" && jsonTag != "-" {
+			delete(extra, jsonTag)
+		}
+	}
+
+	issue.Extra = extra
+	return nil
 }
 
 type IssueFilter struct {
@@ -251,28 +338,6 @@ func (c *Client) DeleteIssue(id int) error {
 
 func (issue *Issue) GetTitle() string {
 	return issue.Tracker.Name + " #" + strconv.Itoa(issue.Id) + ": " + issue.Subject
-}
-
-// MarshalJSON marshals issue to JSON.
-// This overrides the default MarshalJSON() to reset parent issue.
-func (issue Issue) MarshalJSON() ([]byte, error) {
-	type Issue2 Issue
-
-	// To reset parent issue, set empty string to "parent_issue_id"
-	var parentIssueID *string
-	if issue.Parent == nil {
-		// reset parent issue
-		id := ""
-		parentIssueID = &id
-	}
-
-	return json.Marshal(&struct {
-		Issue2
-		ParentId *string `json:"parent_issue_id,omitempty"`
-	}{
-		Issue2:   Issue2(issue),
-		ParentId: parentIssueID,
-	})
 }
 
 func getIssueFilterClause(filter *IssueFilter) string {
