@@ -8,6 +8,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_UnmarshalRemarshalIssueJsonWithExtraFields(t *testing.T) {
+	var issue gomine.Issue
+	var exampleJson string = exampleIssueStructWithExtraFields()
+	err := json.Unmarshal([]byte(exampleJson), &issue)
+
+	// Assert that there's no error during unmarshaling
+	assert.Nil(t, err, "Error unmarshaling example Json to Issue struct: ", err)
+
+	// Assert that the length is correct
+	assert.Len(t, issue.Extra, 3, "Expected to find %d extra fields, only found %d", 3, len(issue.Extra))
+
+	// Re-marshal the issue
+	marshaledJson, err := json.Marshal(issue)
+	assert.Nil(t, err, "Error marshaling Issue struct back to Json: ", err)
+
+	// Assert that the original JSON and re-marshaled JSON are the same
+	assert.JSONEq(t, exampleJson, string(marshaledJson), "Original and re-marshaled JSON do not match")
+}
+
 func Test_UnmarshalIssueJson(t *testing.T) {
 	var issue gomine.Issue
 	var exampleJson string = exampleIssueStruct()

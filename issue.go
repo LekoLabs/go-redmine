@@ -88,13 +88,62 @@ type Issue struct {
 	Extra          map[string]interface{} `json:"-"`
 }
 
-func (o *Issue) UnmarshalJSON(data []byte) error {
+func (issue Issue) MarshalJSON() ([]byte, error) {
+	type Issue2 Issue
+
+	// To reset parent issue, set empty string to "parent_issue_id"
+	var parentIssueID *string
+	if issue.Parent == nil {
+		// reset parent issue
+		id := ""
+		parentIssueID = &id
+	}
+
+	// Marshal the main struct without the Extra fields
+	aux, err := json.Marshal(&struct {
+		Issue2
+		ParentId *string `json:"parent_issue_id,omitempty"`
+	}{
+		Issue2:   Issue2(issue),
+		ParentId: parentIssueID,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Marshal the Extra fields
+	extraData, err := json.Marshal(issue.Extra)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal both into maps
+	var auxMap map[string]interface{}
+	var extraMap map[string]interface{}
+
+	if err := json.Unmarshal(aux, &auxMap); err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(extraData, &extraMap); err != nil {
+		return nil, err
+	}
+
+	// Merge the Extra fields into the main struct map
+	for key, value := range extraMap {
+		auxMap[key] = value
+	}
+
+	// Marshal the final map back to JSON
+	return json.Marshal(auxMap)
+}
+
+func (issue *Issue) UnmarshalJSON(data []byte) error {
 	// Create an alias type to avoid infinite recursion
 	type Alias Issue
 	aux := &struct {
 		*Alias
 	}{
-		Alias: (*Alias)(o),
+		Alias: (*Alias)(issue),
 	}
 
 	// Unmarshal known fields
@@ -109,7 +158,7 @@ func (o *Issue) UnmarshalJSON(data []byte) error {
 	}
 
 	// Use reflection to iterate over the struct fields and remove known fields from the map
-	val := reflect.ValueOf(o).Elem()
+	val := reflect.ValueOf(issue).Elem()
 	for i := 0; i < val.NumField(); i++ {
 		field := val.Type().Field(i)
 		jsonTag := field.Tag.Get("json")
@@ -120,7 +169,7 @@ func (o *Issue) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	o.Extra = extra
+	issue.Extra = extra
 	return nil
 }
 
@@ -289,28 +338,6 @@ func (c *Client) DeleteIssue(id int) error {
 
 func (issue *Issue) GetTitle() string {
 	return issue.Tracker.Name + " #" + strconv.Itoa(issue.Id) + ": " + issue.Subject
-}
-
-// MarshalJSON marshals issue to JSON.
-// This overrides the default MarshalJSON() to reset parent issue.
-func (issue Issue) MarshalJSON() ([]byte, error) {
-	type Issue2 Issue
-
-	// To reset parent issue, set empty string to "parent_issue_id"
-	var parentIssueID *string
-	if issue.Parent == nil {
-		// reset parent issue
-		id := ""
-		parentIssueID = &id
-	}
-
-	return json.Marshal(&struct {
-		Issue2
-		ParentId *string `json:"parent_issue_id,omitempty"`
-	}{
-		Issue2:   Issue2(issue),
-		ParentId: parentIssueID,
-	})
 }
 
 func getIssueFilterClause(filter *IssueFilter) string {
