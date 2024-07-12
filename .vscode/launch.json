@@ -1,0 +1,37 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch tests on Issue struct",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}/tests/issue_test.go",
+            "buildFlags": "",
+            "logOutput": "debugger",
+            "showLog": true
+        },
+        {
+            "name": "Test Unmarshal Json to Issue struct",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}/tests",
+            "args": ["-test.run", "Test_UnmarshalIssueJson"],
+            "buildFlags": "",
+            "logOutput": "debugger",
+            "showLog": true
+        },
+        {
+            "name": "Test Unmarshal Json to Issue struct (Extra fields)",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "program": "${workspaceFolder}/tests",
+            "args": ["-test.run", "Test_UnmarshalIssueJsonWithExtraFields"],
+            "buildFlags": "",
+            "logOutput": "debugger",
+            "showLog": true
+        }
+    ]
+}
