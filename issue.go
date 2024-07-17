@@ -44,6 +44,7 @@ type IssueCreationRequest struct {
 }
 
 type IssueToCreate struct {
+	Id             int            `json:"id,omitempty"`
 	ProjectId      int            `json:"project_id"`
 	TrackerId      int            `json:"tracker_id"`
 	StatusId       int            `json:"status_id,omitempty"`
@@ -58,6 +59,7 @@ type IssueToCreate struct {
 	WatcherUserIds []int          `json:"watcher_user_ids,omitempty"`
 	IsPrivate      bool           `json:"is_private"`
 	EstimatedHours float32        `json:"estimated_hours,omitempty"`
+	Notes          string         `json:"notes"` // Notes about the updates
 }
 
 type Issue struct {
@@ -84,6 +86,7 @@ type Issue struct {
 	Uploads        []*Upload              `json:"uploads"`
 	DoneRatio      float32                `json:"done_ratio"`
 	EstimatedHours float32                `json:"estimated_hours"`
+	IsPrivate      bool                   `json:"is_private"`
 	Journals       []*Journal             `json:"journals"`
 	Extra          map[string]interface{} `json:"-"`
 }
@@ -273,8 +276,8 @@ func (c *Client) CreateIssue(issueToCreate IssueToCreate) (*Issue, error) {
 	return &r.Issue, nil
 }
 
-func (c *Client) UpdateIssue(issue Issue) error {
-	var ir issueRequest
+func (c *Client) UpdateIssue(issue IssueToCreate) error {
+	var ir IssueCreationRequest
 	ir.Issue = issue
 	s, err := json.Marshal(ir)
 	if err != nil {
