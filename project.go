@@ -3,6 +3,7 @@ package redmine
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -62,7 +63,18 @@ func (c *Client) Project(id string) (*Project, error) {
 }
 
 func (c *Client) Projects() ([]Project, error) {
-	res, err := c.Get(c.endpoint + "/projects.json?key=" + c.apikey + c.getPaginationClause())
+	url := fmt.Sprintf("%s/projects.json?key=%s%s", c.endpoint, c.apikey, c.getPaginationClause())
+	return c.fetchProjects(url)
+}
+
+func (c *Client) ProjectsByFilter(f map[string]string) ([]Project, error) {
+	filter := mapToQueryString(f)
+	url := fmt.Sprintf("%s/projects.json?%s&key=%s%s", c.endpoint, filter, c.apikey, c.getPaginationClause())
+	return c.fetchProjects(url)
+}
+
+func (c *Client) fetchProjects(url string) ([]Project, error) {
+	res, err := c.Get(url)
 	if err != nil {
 		return nil, err
 	}
