@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -19,8 +19,8 @@ type Upload struct {
 	ContentType string `json:"content_type"`
 }
 
-func (c *Client) Upload(filename string) (*Upload, error) {
-	content, err := ioutil.ReadFile(filename)
+func (c *Client) Upload(filename string, userName ...string) (*Upload, error) {
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -29,6 +29,9 @@ func (c *Client) Upload(filename string) (*Upload, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/octet-stream")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return nil, err

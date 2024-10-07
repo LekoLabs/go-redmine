@@ -38,7 +38,7 @@ func (c *Client) IssueRelations(issueId int) ([]IssueRelation, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r issueRelationsResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -65,7 +65,7 @@ func (c *Client) IssueRelation(id int) (*IssueRelation, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r issueRelationResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -82,7 +82,7 @@ func (c *Client) IssueRelation(id int) (*IssueRelation, error) {
 	return &r.IssueRelation, nil
 }
 
-func (c *Client) CreateIssueRelation(issueRelation IssueRelation) (*IssueRelation, error) {
+func (c *Client) CreateIssueRelation(issueRelation IssueRelation, userName ...string) (*IssueRelation, error) {
 	var ir issueRelationRequest
 	ir.IssueRelation = issueRelation
 	s, err := json.Marshal(ir)
@@ -94,6 +94,9 @@ func (c *Client) CreateIssueRelation(issueRelation IssueRelation) (*IssueRelatio
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return nil, err
@@ -117,7 +120,7 @@ func (c *Client) CreateIssueRelation(issueRelation IssueRelation) (*IssueRelatio
 	return &r.IssueRelation, nil
 }
 
-func (c *Client) UpdateIssueRelation(issueRelation IssueRelation) error {
+func (c *Client) UpdateIssueRelation(issueRelation IssueRelation, userName ...string) error {
 	var ir issueRelationRequest
 	ir.IssueRelation = issueRelation
 	s, err := json.Marshal(ir)
@@ -129,6 +132,9 @@ func (c *Client) UpdateIssueRelation(issueRelation IssueRelation) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -136,7 +142,7 @@ func (c *Client) UpdateIssueRelation(issueRelation IssueRelation) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)
@@ -152,12 +158,15 @@ func (c *Client) UpdateIssueRelation(issueRelation IssueRelation) error {
 	return err
 }
 
-func (c *Client) DeleteIssueRelation(id int) error {
+func (c *Client) DeleteIssueRelation(id int, userName ...string) error {
 	req, err := http.NewRequest("DELETE", c.endpoint+"/relations/"+strconv.Itoa(id)+".json?key="+c.apikey, strings.NewReader(""))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -165,7 +174,7 @@ func (c *Client) DeleteIssueRelation(id int) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

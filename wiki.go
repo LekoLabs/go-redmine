@@ -48,7 +48,7 @@ func (c *Client) WikiPages(projectId int) ([]WikiPage, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r wikiPagesResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -84,7 +84,7 @@ func (c *Client) getWikiPage(projectId int, resource string) (*WikiPage, error) 
 	decoder := json.NewDecoder(res.Body)
 	var r wikiPageResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -101,7 +101,7 @@ func (c *Client) getWikiPage(projectId int, resource string) (*WikiPage, error) 
 }
 
 // CreateWikiPage creates wiki page.
-func (c *Client) CreateWikiPage(projectId int, wikiPage WikiPage) (*WikiPage, error) {
+func (c *Client) CreateWikiPage(projectId int, wikiPage WikiPage, userName ...string) (*WikiPage, error) {
 	var wpr wikiPageRequest
 	wpr.WikiPage = wikiPage
 	s, err := json.Marshal(wpr)
@@ -113,6 +113,9 @@ func (c *Client) CreateWikiPage(projectId int, wikiPage WikiPage) (*WikiPage, er
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return nil, err
@@ -136,7 +139,7 @@ func (c *Client) CreateWikiPage(projectId int, wikiPage WikiPage) (*WikiPage, er
 }
 
 // UpdateWikiPage updates the wiki page given by the Title field of wikiPage.
-func (c *Client) UpdateWikiPage(projectId int, wikiPage WikiPage) error {
+func (c *Client) UpdateWikiPage(projectId int, wikiPage WikiPage, userName ...string) error {
 	var wpr wikiPageRequest
 	wpr.WikiPage = wikiPage
 	s, err := json.Marshal(wpr)
@@ -148,13 +151,16 @@ func (c *Client) UpdateWikiPage(projectId int, wikiPage WikiPage) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 
 	if res.StatusCode != 200 {
@@ -182,7 +188,7 @@ func (c *Client) DeleteWikiPage(projectId int, title string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

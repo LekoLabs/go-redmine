@@ -240,7 +240,7 @@ func (c *Client) Issues() ([]Issue, error) {
 	return issues, nil
 }
 
-func (c *Client) CreateIssue(issueToCreate IssueToCreate) (*Issue, error) {
+func (c *Client) CreateIssue(issueToCreate IssueToCreate, userName ...string) (*Issue, error) {
 	var ir IssueCreationRequest
 	ir.Issue = issueToCreate
 	s, err := json.Marshal(ir)
@@ -253,6 +253,9 @@ func (c *Client) CreateIssue(issueToCreate IssueToCreate) (*Issue, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return nil, err
@@ -276,7 +279,7 @@ func (c *Client) CreateIssue(issueToCreate IssueToCreate) (*Issue, error) {
 	return &r.Issue, nil
 }
 
-func (c *Client) UpdateIssue(issue IssueToCreate) error {
+func (c *Client) UpdateIssue(issue IssueToCreate, userName ...string) error {
 	var ir IssueCreationRequest
 	ir.Issue = issue
 	s, err := json.Marshal(ir)
@@ -288,7 +291,12 @@ func (c *Client) UpdateIssue(issue IssueToCreate) error {
 	if err != nil {
 		return err
 	}
+
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
+	
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -296,7 +304,7 @@ func (c *Client) UpdateIssue(issue IssueToCreate) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not found")
+		return errors.New("not Found")
 	}
 	if res.StatusCode/100 != 2 {
 		decoder := json.NewDecoder(res.Body)
@@ -312,12 +320,15 @@ func (c *Client) UpdateIssue(issue IssueToCreate) error {
 	return err
 }
 
-func (c *Client) DeleteIssue(id int) error {
+func (c *Client) DeleteIssue(id int, userName ...string) error {
 	req, err := http.NewRequest("DELETE", c.endpoint+"/issues/"+strconv.Itoa(id)+".json?key="+c.apikey, strings.NewReader(""))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -402,7 +413,7 @@ func getOneIssue(c *Client, id int, args map[string]string) (*Issue, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return nil, errors.New("not found")
+		return nil, errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

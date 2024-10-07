@@ -97,7 +97,7 @@ func (c *Client) fetchProjects(url string) ([]Project, error) {
 	return r.Projects, nil
 }
 
-func (c *Client) CreateProject(project Project) (*Project, error) {
+func (c *Client) CreateProject(project Project, userName ...string) (*Project, error) {
 	var ir projectRequest
 	ir.Project = project
 	s, err := json.Marshal(ir)
@@ -109,6 +109,9 @@ func (c *Client) CreateProject(project Project) (*Project, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return nil, err
@@ -132,7 +135,7 @@ func (c *Client) CreateProject(project Project) (*Project, error) {
 	return &r.Project, nil
 }
 
-func (c *Client) UpdateProject(project Project) error {
+func (c *Client) UpdateProject(project Project, userName ...string) error {
 	var ir projectRequest
 	ir.Project = project
 	s, err := json.Marshal(ir)
@@ -144,6 +147,9 @@ func (c *Client) UpdateProject(project Project) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -151,7 +157,7 @@ func (c *Client) UpdateProject(project Project) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not found")
+		return errors.New("not Found")
 	}
 	if res.StatusCode != 204 {
 		decoder := json.NewDecoder(res.Body)
@@ -167,12 +173,15 @@ func (c *Client) UpdateProject(project Project) error {
 	return err
 }
 
-func (c *Client) DeleteProject(id string) error {
+func (c *Client) DeleteProject(id string, userName ...string) error {
 	req, err := http.NewRequest("DELETE", c.endpoint+"/projects/"+id+".json?key="+c.apikey, strings.NewReader(""))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -180,7 +189,7 @@ func (c *Client) DeleteProject(id string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not found")
+		return errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

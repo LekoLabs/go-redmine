@@ -54,7 +54,7 @@ func (c *Client) TimeEntriesWithFilter(filter Filter) ([]TimeEntry, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r timeEntriesResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -81,7 +81,7 @@ func (c *Client) TimeEntries(projectId int) ([]TimeEntry, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r timeEntriesResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -108,7 +108,7 @@ func (c *Client) TimeEntry(id int) (*TimeEntry, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r timeEntryResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -125,7 +125,7 @@ func (c *Client) TimeEntry(id int) (*TimeEntry, error) {
 	return &r.TimeEntry, nil
 }
 
-func (c *Client) CreateTimeEntry(timeEntry TimeEntry) (*TimeEntry, error) {
+func (c *Client) CreateTimeEntry(timeEntry TimeEntry, userName ...string) (*TimeEntry, error) {
 	var ir timeEntryRequest
 	ir.TimeEntry = timeEntry
 	s, err := json.Marshal(ir)
@@ -137,6 +137,9 @@ func (c *Client) CreateTimeEntry(timeEntry TimeEntry) (*TimeEntry, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return nil, err
@@ -160,7 +163,7 @@ func (c *Client) CreateTimeEntry(timeEntry TimeEntry) (*TimeEntry, error) {
 	return &r.TimeEntry, nil
 }
 
-func (c *Client) UpdateTimeEntry(timeEntry TimeEntry) error {
+func (c *Client) UpdateTimeEntry(timeEntry TimeEntry, userName ...string) error {
 	var ir timeEntryRequest
 	ir.TimeEntry = timeEntry
 	s, err := json.Marshal(ir)
@@ -172,6 +175,9 @@ func (c *Client) UpdateTimeEntry(timeEntry TimeEntry) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -179,7 +185,7 @@ func (c *Client) UpdateTimeEntry(timeEntry TimeEntry) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)
@@ -195,12 +201,15 @@ func (c *Client) UpdateTimeEntry(timeEntry TimeEntry) error {
 	return err
 }
 
-func (c *Client) DeleteTimeEntry(id int) error {
+func (c *Client) DeleteTimeEntry(id int, userName ...string) error {
 	req, err := http.NewRequest("DELETE", c.endpoint+"/time_entries/"+strconv.Itoa(id)+".json?key="+c.apikey, strings.NewReader(""))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -208,7 +217,7 @@ func (c *Client) DeleteTimeEntry(id int) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

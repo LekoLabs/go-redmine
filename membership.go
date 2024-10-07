@@ -38,7 +38,7 @@ func (c *Client) Memberships(projectId int) ([]Membership, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r membershipsResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		err = errorFromResp(decoder, res.StatusCode)
@@ -61,7 +61,7 @@ func (c *Client) Membership(id int) (*Membership, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r membershipResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		err = errorFromResp(decoder, res.StatusCode)
@@ -74,7 +74,7 @@ func (c *Client) Membership(id int) (*Membership, error) {
 	return &r.Membership, nil
 }
 
-func (c *Client) CreateMembership(membership Membership) (*Membership, error) {
+func (c *Client) CreateMembership(membership Membership, userName ...string) (*Membership, error) {
 	var ir membershipRequest
 	ir.Membership = membership
 	s, err := json.Marshal(ir)
@@ -86,6 +86,9 @@ func (c *Client) CreateMembership(membership Membership) (*Membership, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return nil, err
@@ -105,7 +108,7 @@ func (c *Client) CreateMembership(membership Membership) (*Membership, error) {
 	return &r.Membership, nil
 }
 
-func (c *Client) UpdateMembership(membership Membership) error {
+func (c *Client) UpdateMembership(membership Membership, userName ...string) error {
 	var ir membershipRequest
 	ir.Membership = membership
 	s, err := json.Marshal(ir)
@@ -117,6 +120,9 @@ func (c *Client) UpdateMembership(membership Membership) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -124,7 +130,7 @@ func (c *Client) UpdateMembership(membership Membership) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)
@@ -136,12 +142,15 @@ func (c *Client) UpdateMembership(membership Membership) error {
 	return err
 }
 
-func (c *Client) DeleteMembership(id int) error {
+func (c *Client) DeleteMembership(id int, userName ...string) error {
 	req, err := http.NewRequest("DELETE", c.endpoint+"/memberships/"+strconv.Itoa(id)+".json?key="+c.apikey, strings.NewReader(""))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -149,7 +158,7 @@ func (c *Client) DeleteMembership(id int) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

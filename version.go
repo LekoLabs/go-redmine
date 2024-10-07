@@ -40,7 +40,7 @@ func (c *Client) Version(id int) (*Version, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
@@ -68,7 +68,7 @@ func (c *Client) Versions(projectId int) ([]Version, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
@@ -88,7 +88,7 @@ func (c *Client) Versions(projectId int) ([]Version, error) {
 	return r.Versions, nil
 }
 
-func (c *Client) CreateVersion(version Version) (*Version, error) {
+func (c *Client) CreateVersion(version Version, userName ...string) (*Version, error) {
 	var ir versionRequest
 	ir.Version = version
 	s, err := json.Marshal(ir)
@@ -100,6 +100,9 @@ func (c *Client) CreateVersion(version Version) (*Version, error) {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return nil, err
@@ -107,7 +110,7 @@ func (c *Client) CreateVersion(version Version) (*Version, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
@@ -127,7 +130,7 @@ func (c *Client) CreateVersion(version Version) (*Version, error) {
 	return &r.Version, err
 }
 
-func (c *Client) UpdateVersion(version Version) error {
+func (c *Client) UpdateVersion(version Version, userName ...string) error {
 	var ir versionRequest
 	ir.Version = version
 	s, err := json.Marshal(ir)
@@ -139,6 +142,9 @@ func (c *Client) UpdateVersion(version Version) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -146,7 +152,7 @@ func (c *Client) UpdateVersion(version Version) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -158,12 +164,15 @@ func (c *Client) UpdateVersion(version Version) error {
 	return err
 }
 
-func (c *Client) DeleteVersion(id int) error {
+func (c *Client) DeleteVersion(id int, userName ...string) error {
 	req, err := http.NewRequest("DELETE", c.endpoint+"/versions/"+strconv.Itoa(id)+".json?key="+c.apikey, strings.NewReader(""))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -171,7 +180,7 @@ func (c *Client) DeleteVersion(id int) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult

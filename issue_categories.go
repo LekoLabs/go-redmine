@@ -38,7 +38,7 @@ func (c *Client) IssueCategories(projectId int) ([]IssueCategory, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r issueCategoriesResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -65,7 +65,7 @@ func (c *Client) IssueCategory(id int) (*IssueCategory, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r issueCategoryResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -82,7 +82,7 @@ func (c *Client) IssueCategory(id int) (*IssueCategory, error) {
 	return &r.IssueCategory, nil
 }
 
-func (c *Client) CreateIssueCategory(issueCategory IssueCategory) (*IssueCategory, error) {
+func (c *Client) CreateIssueCategory(issueCategory IssueCategory, userName ...string) (*IssueCategory, error) {
 	var ir issueCategoryRequest
 	ir.IssueCategory = issueCategory
 	s, err := json.Marshal(ir)
@@ -94,6 +94,9 @@ func (c *Client) CreateIssueCategory(issueCategory IssueCategory) (*IssueCategor
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return nil, err
@@ -117,7 +120,7 @@ func (c *Client) CreateIssueCategory(issueCategory IssueCategory) (*IssueCategor
 	return &r.IssueCategory, nil
 }
 
-func (c *Client) UpdateIssueCategory(issueCategory IssueCategory) error {
+func (c *Client) UpdateIssueCategory(issueCategory IssueCategory, userName ...string) error {
 	var ir issueCategoryRequest
 	ir.IssueCategory = issueCategory
 	s, err := json.Marshal(ir)
@@ -129,6 +132,9 @@ func (c *Client) UpdateIssueCategory(issueCategory IssueCategory) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -136,7 +142,7 @@ func (c *Client) UpdateIssueCategory(issueCategory IssueCategory) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)
@@ -152,12 +158,15 @@ func (c *Client) UpdateIssueCategory(issueCategory IssueCategory) error {
 	return err
 }
 
-func (c *Client) DeleteIssueCategory(id int) error {
+func (c *Client) DeleteIssueCategory(id int, userName ...string) error {
 	req, err := http.NewRequest("DELETE", c.endpoint+"/issue_categories/"+strconv.Itoa(id)+".json?key="+c.apikey, strings.NewReader(""))
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if len(userName) > 0 {
+		req.Header.Set("X-Redmine-Switch-User", userName[0])	
+	}
 	res, err := c.Do(req)
 	if err != nil {
 		return err
@@ -165,7 +174,7 @@ func (c *Client) DeleteIssueCategory(id int) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("Not Found")
+		return errors.New("not Found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
