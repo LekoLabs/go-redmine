@@ -48,7 +48,7 @@ func (c *Client) WikiPages(projectId int) ([]WikiPage, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r wikiPagesResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -84,7 +84,7 @@ func (c *Client) getWikiPage(projectId int, resource string) (*WikiPage, error) 
 	decoder := json.NewDecoder(res.Body)
 	var r wikiPageResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -160,7 +160,7 @@ func (c *Client) UpdateWikiPage(projectId int, wikiPage WikiPage, userName ...st
 	}
 	defer res.Body.Close()
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 
 	if res.StatusCode != 200 {
@@ -188,7 +188,7 @@ func (c *Client) DeleteWikiPage(projectId int, title string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

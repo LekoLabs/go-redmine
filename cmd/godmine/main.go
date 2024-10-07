@@ -665,7 +665,7 @@ func editWikiPage(title string) error {
 	c := redmine.NewClient(conf.Endpoint, conf.Apikey)
 	page, err := c.WikiPage(conf.Project, title)
 	if err != nil {
-		if err.Error() != "Not Found" {
+		if err.Error() != "not found" {
 			return fmt.Errorf("Failed to read wiki page for editing: %s\n", err)
 		}
 		page = &redmine.WikiPage{Title: title}

@@ -40,7 +40,7 @@ func (c *Client) Version(id int) (*Version, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
@@ -68,7 +68,7 @@ func (c *Client) Versions(projectId int) ([]Version, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
@@ -110,7 +110,7 @@ func (c *Client) CreateVersion(version Version, userName ...string) (*Version, e
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
@@ -152,7 +152,7 @@ func (c *Client) UpdateVersion(version Version, userName ...string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -180,7 +180,7 @@ func (c *Client) DeleteVersion(id int, userName ...string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult

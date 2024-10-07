@@ -38,7 +38,7 @@ func (c *Client) Memberships(projectId int) ([]Membership, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r membershipsResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		err = errorFromResp(decoder, res.StatusCode)
@@ -61,7 +61,7 @@ func (c *Client) Membership(id int) (*Membership, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r membershipResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		err = errorFromResp(decoder, res.StatusCode)
@@ -130,7 +130,7 @@ func (c *Client) UpdateMembership(membership Membership, userName ...string) err
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)
@@ -158,7 +158,7 @@ func (c *Client) DeleteMembership(id int, userName ...string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

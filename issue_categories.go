@@ -38,7 +38,7 @@ func (c *Client) IssueCategories(projectId int) ([]IssueCategory, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r issueCategoriesResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -65,7 +65,7 @@ func (c *Client) IssueCategory(id int) (*IssueCategory, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r issueCategoryResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -142,7 +142,7 @@ func (c *Client) UpdateIssueCategory(issueCategory IssueCategory, userName ...st
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)
@@ -174,7 +174,7 @@ func (c *Client) DeleteIssueCategory(id int, userName ...string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

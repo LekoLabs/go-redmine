@@ -54,7 +54,7 @@ func (c *Client) TimeEntriesWithFilter(filter Filter) ([]TimeEntry, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r timeEntriesResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -81,7 +81,7 @@ func (c *Client) TimeEntries(projectId int) ([]TimeEntry, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r timeEntriesResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -108,7 +108,7 @@ func (c *Client) TimeEntry(id int) (*TimeEntry, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r timeEntryResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -185,7 +185,7 @@ func (c *Client) UpdateTimeEntry(timeEntry TimeEntry, userName ...string) error 
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)
@@ -217,7 +217,7 @@ func (c *Client) DeleteTimeEntry(id int, userName ...string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

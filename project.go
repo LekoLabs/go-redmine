@@ -157,7 +157,7 @@ func (c *Client) UpdateProject(project Project, userName ...string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 	if res.StatusCode != 204 {
 		decoder := json.NewDecoder(res.Body)
@@ -189,7 +189,7 @@ func (c *Client) DeleteProject(id string, userName ...string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)

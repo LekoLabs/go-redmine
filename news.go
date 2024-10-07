@@ -30,7 +30,7 @@ func (c *Client) News(projectId int) ([]News, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r newsResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("Not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult

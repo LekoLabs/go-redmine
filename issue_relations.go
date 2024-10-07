@@ -38,7 +38,7 @@ func (c *Client) IssueRelations(issueId int) ([]IssueRelation, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r issueRelationsResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -65,7 +65,7 @@ func (c *Client) IssueRelation(id int) (*IssueRelation, error) {
 	decoder := json.NewDecoder(res.Body)
 	var r issueRelationResult
 	if res.StatusCode == 404 {
-		return nil, errors.New("not Found")
+		return nil, errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		var er errorsResult
@@ -142,7 +142,7 @@ func (c *Client) UpdateIssueRelation(issueRelation IssueRelation, userName ...st
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 	if res.StatusCode != 200 {
 		decoder := json.NewDecoder(res.Body)
@@ -174,7 +174,7 @@ func (c *Client) DeleteIssueRelation(id int, userName ...string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode == 404 {
-		return errors.New("not Found")
+		return errors.New("not found")
 	}
 
 	decoder := json.NewDecoder(res.Body)
